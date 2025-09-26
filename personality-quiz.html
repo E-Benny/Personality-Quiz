@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        /* ===============================
+ Global Styles
+=============================== */
+
+/* Set up global background with animated GIF */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: url("https://64.media.tumblr.com/375f5e55441bfdce61f0d58a96668a0e/0e0983c78fd49991-b3/s500x750/1ec5f6eca6afe5a5cd8dce2f9d2e928c57326664.gifv");
+  background-size: cover;     /* Fill the entire screen */
+  background-position: center; /* Center the background */
+  background-repeat: no-repeat;
+  background-color: #f5faff;  /* Fallback color */
+}
+
+/* Headings and text use Orbitron for a futuristic look */
+h1,h2,h3,h4,p,a,button {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Form elements (inputs, labels, etc.) use Exo 2 */
+input, select, textarea, button, label {
+  font-family: 'Exo 2', sans-serif;
+}
+
+/* ===============================
+ Layout Styles
+=============================== */
+
+/* Flex container to center quiz in viewport */
+.quiz-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Full height */
+  padding: 20px;
+}
+
+/* Quiz card is a grid with two columns */
+.quiz-card {
+  width: 100%;
+  max-width: 900px;
+  background-color: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Left + Right column */
+}
+
+/* Left panel with step counter + question */
+.quiz-left {
+  background-color: #e6f2ff; /* Light pastel blue */
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Step counter text */
+.step-text {
+  font-size: 0.875rem;
+  color: #0077cc;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* Main question text */
+.question-text {
+  font-size: 2rem;
+  color: #004c99;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Right panel with image, options, and navigation */
+.quiz-right {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Space between items */
+}
+
+/* Image for each question */
+.question-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;       /* Cover the container */
+  object-position: center 20%; /* Slightly shifted down */
+  border-radius: 12px;
+  border: 1px solid #d9eaff;
+}
+
+/* Options container (vertical list) */
+.options-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual option (radio + label) */
+.option-item {
+  display: flex;
+  align-items: center;
+  border: 2px solid #cce0ff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  user-select: none;
+}
+
+/* Add space between radio and label text */
+.option-item input {
+  margin-right: 12px;
+}
+
+/* Hover effect for options */
+.option-item:hover {
+  background-color: #f0f7ff;
+}
+
+/* Style the selected option */
+.option-item input:checked + span {
+  color: #0077cc;
+  font-weight: bold;
+}
+
+/* Navigation buttons row */
+.navigation-buttons {
+  margin-top: auto; /* Push to bottom */
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* General button style */
+.nav-button {
+  flex: 1; /* Take equal width */
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #ffffff;
+}
+
+/* Previous button (light blue) */
+.prev-button {
+  background-color: #8caedb;
+}
+
+/* Next button (dark blue) */
+.next-button {
+  background-color: #0077cc;
+}
+
+/* Disabled button state */
+.nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hover effect for active buttons */
+.nav-button:hover:not(:disabled) {
+  background-color: #005c99;
+}
+
+/* ===============================
+ Thank You Card (after quiz ends)
+=============================== */
+
+/* Final summary card styling */
+.thank-you-card {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 600px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Thank-you heading */
+.thank-you-card h2 {
+  margin-top: 0;
+  color: #004c99;
+}
+
+/* Answer summary list */
+.answer-summary {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  text-align: left;
+}
+
+/* Answer list item spacing */
+.answer-summary li {
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+    </style>
+    <script>
+        // ===============================
+// Quiz Data
+// ===============================
+
+/* Array of questions with text, options, and image URL */
+const quiz = [
+  {
+    question: 'Who are your favorite artists?',
+    options: ['Doja Cat', 'PinkPantheress', 'Tyla', 'Karol G'],
+    image: 'https://i.pinimg.com/1200x/0e/0b/d0/0e0bd0986b6e1ac78ebb36246eeba25e.jpg'
+  },
+  {
+    question: 'What fashion brand speaks to you?',
+    options: ['Dilara Findikoglu', 'Diesel', 'Balenciaga', 'Carolina Herrera'],
+    image: 'https://i.pinimg.com/1200x/90/64/69/906469dd243d71c8c81a0f04a7ce2921.jpg'
+  },
+  {
+    question: 'What are your favorite hobbies?',
+    options: ['Listening to music', 'Sewing', 'Painting', 'Cooking'],
+    image: 'https://i.pinimg.com/1200x/f1/46/26/f14626465690d5ac5a02671c73ab7e6f.jpg'
+  },
+  {
+    question: 'Pick your favorite movie',
+    options: ['Foxy Brown', 'Natural Born Killers', 'Volver', 'Anora'],
+    image: 'https://i.pinimg.com/1200x/a7/fe/10/a7fe10607e8ff779eb4bbcf76f90d3cb.jpg'
+  },
+  {
+    question: 'What city has the best fashion week?',
+    options: ['Paris', 'New York', 'London', 'Milan'],
+    image: 'https://i.pinimg.com/736x/d3/38/3f/d3383f3a66f941b3a794ec7f1bc73ca7.jpg'
+  }
+];
+
+// Current step index
+let currentStep = 0;
+// Array to store user answers (null initially)
+const answers = new Array(quiz.length).fill(null);
+
+// ===============================
+// DOM Element References
+// ===============================
+
+const stepTextEl = document.querySelector('.step-text');        // Step counter
+const questionTextEl = document.querySelector('.question-text'); // Question text
+const imageEl = document.querySelector('.question-image');       // Image element
+const optionsListEl = document.querySelector('.options-list');   // Options container
+const prevButton = document.querySelector('.prev-button');       // Prev button
+const nextButton = document.querySelector('.next-button');       // Next/Finish button
+
+// ===============================
+// Rendering Function
+// ===============================
+
+/**
+ * Render the current question, options, and image into the UI
+ */
+function renderQuestion() {
+  const q = quiz[currentStep];
+
+  // Update step counter and question text
+  stepTextEl.textContent = 'Step ' + (currentStep + 1) + ' / ' + quiz.length;
+  questionTextEl.textContent = q.question;
+  imageEl.src = q.image;
+  imageEl.alt = q.question;
+
+  // Clear old options
+  optionsListEl.innerHTML = '';
+
+  // Create option items dynamically
+  q.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option-item';
+
+    // Radio input
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'question' + currentStep;
+    input.value = opt;
+
+    // Preserve selected answer when navigating back
+    if (answers[currentStep] === opt) input.checked = true;
+
+    // Save answer when option selected
+    input.addEventListener('change', () => {
+      answers[currentStep] = opt;
+    });
+
+    // Span for option text
+    const span = document.createElement('span');
+    span.textContent = opt;
+
+    // Assemble label
+    label.appendChild(input);
+    label.appendChild(span);
+    optionsListEl.appendChild(label);
+  });
+
+  // Disable previous button on first step
+  prevButton.disabled = currentStep === 0;
+
+  // Change button text on last step
+  nextButton.textContent = currentStep === quiz.length - 1 ? 'Finish' : 'Next';
+}
+
+// ===============================
+// Navigation Logic
+// ===============================
+
+// Go back one question
+prevButton.addEventListener('click', () => {
+  if (currentStep > 0) {
+    currentStep--;
+    renderQuestion();
+  }
+});
+
+// Go forward or finish quiz
+nextButton.addEventListener('click', () => {
+  if (currentStep < quiz.length - 1) {
+    currentStep++;
+    renderQuestion();
+  } else {
+    showSummary(); // End of quiz
+  }
+});
+
+// ===============================
+// Summary Screen
+// ===============================
+
+/**
+ * Show final thank-you message with answer summary
+ */
+function showSummary() {
+  const container = document.querySelector('.quiz-container');
+  container.innerHTML = ''; // Clear quiz
+
+  // Create summary card
+  const card = document.createElement('div');
+  card.className = 'thank-you-card';
+
+  const h2 = document.createElement('h2');
+  h2.textContent = 'Thank you for completing the quiz!';
+
+  const p = document.createElement('p');
+  p.textContent = 'Here’s a summary of your answers:';
+
+  const ul = document.createElement('ul');
+  ul.className = 'answer-summary';
+
+  // Loop through questions and show answers
+  quiz.forEach((q, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<strong>' + q.question + '</strong>: ' + (answers[i] || 'No answer');
+    ul.appendChild(li);
+  });
+
+  // Assemble card
+  card.appendChild(h2);
+  card.appendChild(p);
+  card.appendChild(ul);
+  container.appendChild(card);
+}
+
+// ===============================
+// Initial Load
+// ===============================
+
+// Show first question on page load
+renderQuestion();
+    </script>
+</head>
+<body>
+    <!-- ===============================
+ Quiz App Layout
+ Two-column card with questions, images, and navigation
+=============================== -->
+<div class="quiz-container">
+  <!-- Main quiz card container -->
+  <div class="quiz-card">
+    <!-- Left panel: step number + question text -->
+    <div class="quiz-left">
+      <div class="step-text"></div> <!-- Dynamic step counter -->
+      <h1 class="question-text"></h1> <!-- Dynamic question -->
+    </div>
+    <!-- Right panel: image, options, and navigation -->
+    <div class="quiz-right">
+      <img class="question-image" src="" alt="Question Image"> <!-- Dynamic image -->
+      <div class="options-list"></div> <!-- Dynamic options inserted here -->
+      <div class="navigation-buttons">
+        <button class="nav-button prev-button">Previous</button> <!-- Previous button -->
+        <button class="nav-button next-button">Next</button> <!-- Next/Finish button -->
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
